@@ -1,0 +1,11 @@
+ecommerce_streaming_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      host: 
+      http_path: 
+      token: 
+      catalog: retail_analytics_poc_strm_tab
+      schema: dbt_retail_streaming_poc
+      threads: 2

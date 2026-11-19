@@ -1,0 +1,141 @@
+version: 2
+models:
+- name: slr_customers
+  description: Current customer state, including generated Unknown_Customer_<id> placeholders
+    for order customers whose real details have not arrived.
+  columns:
+  - name: customer_id
+    description: primary key, unique and not null
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: customer_name
+    description: customer full name
+    data_type: string
+    constraints:
+    - type: not_null
+    config:
+      meta:
+        contains_pii: true
+  - name: email
+    description: email description
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: country
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: segment
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: is_deleted
+    data_type: boolean
+  - name: signup_date
+    data_type: date
+    constraints:
+    - type: not_null
+  - name: source_inserted_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: source_updated_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: brz_ingested_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_ingested_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_updated_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: batch_id
+    data_type: string
+  - name: operation_type
+    data_type: string
+  - name: source_file
+    data_type: string
+    constraints:
+    - type: not_null
+  config:
+    materialized: incremental
+    unique_key: customer_id
+    contract:
+      enforced: true
+    merge_exclude_columns:
+    - slr_ingested_at
+- name: slr_orders
+  description: 'Current state: typed Bronze events deduplicated and merged by business
+    key and source timestamp.'
+  columns:
+  - name: order_id
+    description: Order identifier; may repeat across source events.
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: customer_id
+    description: Customer placing the order; relationship validated in Silver.
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: amount
+    description: Raw amount; converted to decimal(18,2) and validated in Silver.
+    data_type: decimal(18,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: amount >= 0 AND amount <= 100000
+  - name: status
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: source_inserted_at
+    description: Raw order date/time; converted and validated in Silver.
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: source_updated_at
+    description: Source change date/time; timestamp validity checked by preflight.
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: brz_ingested_at
+    description: Timestamp generated when the pipeline loads the event.
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_ingested_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_updated_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: batch_id
+    description: Source batch identifier.
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: operation_type
+    description: INSERT or UPDATE; validated by preflight.
+    data_type: string
+  - name: source_file
+    description: Source filename.
+    data_type: string
+    constraints:
+    - type: not_null
+  config:
+    materialized: incremental
+    unique_key: order_id
+    contract:
+      enforced: true
+    merge_exclude_columns:
+    - slr_ingested_at

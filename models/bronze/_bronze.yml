@@ -1,0 +1,73 @@
+models:
+- name: brz_customers
+  description: Raw events streamed from the append-only seed-backed source table.
+  columns:
+  - name: customer_id
+    description: Customer identifier; may repeat across source events.
+    quote: true
+    data_type: string
+  - name: customer_name
+    description: customer full name
+    data_type: string
+    config:
+      meta:
+        contains_pii: true
+  - name: email
+    description: email description
+    data_type: string
+  - name: country
+    data_type: string
+  - name: segment
+    data_type: string
+  - name: signup_date
+    data_type: string
+  - name: source_inserted_at
+    data_type: string
+  - name: source_updated_at
+    data_type: string
+  - name: ingested_at
+    data_type: timestamp
+  - name: batch_id
+    data_type: string
+  - name: operation_type
+    data_type: string
+  - name: source_file
+    data_type: string
+  config:
+    on_configuration_change: apply
+- name: brz_orders
+  description: Raw events streamed from the append-only seed-backed source table.
+  columns:
+  - name: order_id
+    description: Order identifier; may repeat across source events.
+    data_type: string
+  - name: customer_id
+    description: Customer placing the order; relationship validated in Silver.
+    data_type: string
+  - name: amount
+    description: Raw amount; converted to decimal(18,2) and validated in Silver.
+    data_type: string
+  - name: status
+    description: Raw order status; allowed values validated in Silver.
+    data_type: string
+  - name: source_inserted_at
+    description: Raw order date/time; converted and validated in Silver.
+    data_type: string
+  - name: source_updated_at
+    description: Source change date/time; timestamp validity checked by preflight.
+    data_type: string
+  - name: ingested_at
+    description: Timestamp generated when the pipeline loads the event.
+    data_type: timestamp
+  - name: batch_id
+    description: Source batch identifier.
+    data_type: string
+  - name: operation_type
+    description: INSERT or UPDATE; validated by preflight.
+    data_type: string
+  - name: source_file
+    description: Source filename.
+    data_type: string
+  config:
+    on_configuration_change: apply
+version: 2

@@ -1,0 +1,10 @@
+version: 2
+snapshots:
+- name: dim_customers_scd2
+  description: Customer SCD2 history captured from the current Silver customer state.
+    Preserves the original snapshot key, timestamp strategy, and metadata names.
+  relation: ref('slr_customers')
+  config:
+    unique_key: customer_id
+    strategy: timestamp
+    updated_at: source_updated_at

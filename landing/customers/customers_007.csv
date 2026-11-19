@@ -1,0 +1,2 @@
+customer_id,customer_name,email,country,segment,signup_date,source_inserted_at,source_updated_at,batch_id,operation_type,source_file
+5,Elena Roy,elena.roy@example.com,India,STANDARD,2026-10-20,2026-10-20 08:00:00,2026-11-15 22:00:00,B007,DELETE,customers_007.csv

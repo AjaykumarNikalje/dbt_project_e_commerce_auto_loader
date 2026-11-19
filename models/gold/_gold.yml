@@ -1,0 +1,224 @@
+version: 2
+models:
+- name: gld_customer_summary
+  description: Order activity and completed sales value per customer.
+  columns:
+  - name: customer_id
+    description: Unique customer identifier.
+    data_type: int
+  - name: customer_name
+    description: Customer full name.
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: country
+    description: Customer country.
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: segment
+    description: Customer segment.
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: total_orders
+    description: Count of all orders across all statuses.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: total_orders >= 0
+  - name: completed_orders
+    description: Count of completed orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: completed_orders >= 0
+  - name: completed_sales_amount
+    description: Total amount of completed orders; zero for customers without completed
+      orders.
+    data_type: decimal(28,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: completed_sales_amount >= 0
+  - name: cancelled_orders
+    description: Count of cancelled orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: cancelled_orders >= 0
+  - name: refunded_orders
+    description: Count of refunded orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: refunded_orders >= 0
+  - name: latest_order_at
+    description: Most recent order creation timestamp; null for customers without
+      orders.
+    data_type: timestamp
+  config:
+    on_configuration_change: apply
+
+- name: gld_daily_sales
+  description: Daily order counts and amounts by status.
+  columns:
+  - name: order_date
+    description: Order creation date; one row per date with orders.
+    data_type: date
+    constraints:
+    - type: not_null
+  - name: total_orders
+    description: Count of all orders across all statuses.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: total_orders >= 0
+  - name: placed_orders
+    description: Count of orders currently in PLACED status.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: placed_orders >= 0
+  - name: completed_orders
+    description: Count of completed orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: completed_orders >= 0
+  - name: completed_sales_amount
+    description: Sum of completed order amounts, grouped by order creation date.
+    data_type: decimal(28,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: completed_sales_amount >= 0
+  - name: cancelled_orders
+    description: Count of cancelled orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: cancelled_orders >= 0
+  - name: cancelled_order_amount
+    description: Sum of cancelled order amounts, grouped by order creation date.
+    data_type: decimal(28,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: cancelled_order_amount >= 0
+  - name: refunded_orders
+    description: Count of refunded orders.
+    data_type: bigint
+    constraints:
+    - type: not_null
+    - type: check
+      expression: refunded_orders >= 0
+  - name: refunded_order_amount
+    description: Sum of refunded order amounts, grouped by order creation date; not
+      actual refund transactions.
+    data_type: decimal(28,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: refunded_order_amount >= 0
+  config:
+    on_configuration_change: apply
+
+- name: dim_customers
+  description: Current customer dimension; one row per customer.
+  columns:
+  - name: customer_id
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: customer_name
+    data_type: string
+    constraints:
+    - type: not_null
+    config:
+      meta:
+        contains_pii: true
+  - name: email
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: country
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: segment
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: signup_date
+    data_type: date
+    constraints:
+    - type: not_null
+  - name: is_deleted
+    data_type: boolean
+  - name: dim_ingested_time
+    description: Timestamp when the customer was first loaded into the dimension.
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: dim_updated_time
+    description: Timestamp when the customer dimension row was last updated.
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_updated_at
+    description: Silver processing timestamp used as the incremental watermark.
+    data_type: timestamp
+  config:
+    materialized: incremental
+    unique_key: customer_id
+    contract:
+      enforced: true
+    merge_exclude_columns:
+    - dim_ingested_time
+    
+- name: fact_orders
+  description: Current order facts; one row per order.
+  columns:
+  - name: order_id
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: customer_id
+    data_type: int
+    constraints:
+    - type: not_null
+  - name: amount
+    data_type: decimal(18,2)
+    constraints:
+    - type: not_null
+    - type: check
+      expression: amount >= 0 AND amount <= 100000
+  - name: status
+    data_type: string
+    constraints:
+    - type: not_null
+  - name: source_inserted_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: source_updated_at
+    data_type: timestamp
+    constraints:
+    - type: not_null
+  - name: slr_updated_at
+    description: Silver processing timestamp used as the incremental watermark.
+    data_type: timestamp
+  config:
+    materialized: incremental
+    unique_key: order_id
+    contract:
+      enforced: true

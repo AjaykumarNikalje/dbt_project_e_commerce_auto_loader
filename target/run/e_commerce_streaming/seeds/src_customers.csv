@@ -1,0 +1,22 @@
+
+    
+    
+    
+    create  table `retail_analytics_poc_strm_tab`.`dbt_retail_streaming_poc`.`src_customers` (customer_id string ,customer_name string ,email string ,country string ,segment string ,signup_date string ,source_inserted_at string ,source_updated_at string ,batch_id string ,operation_type string ,source_file string )
+    
+    using delta
+  
+    
+    
+    
+    
+    
+  ;
+    -- dbt seed --
+    
+          insert overwrite `retail_analytics_poc_strm_tab`.`dbt_retail_streaming_poc`.`src_customers` values
+          (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+      
+
+;
+  

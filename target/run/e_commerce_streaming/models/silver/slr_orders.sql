@@ -1,0 +1,1 @@
+ALTER TABLE `retail_analytics_poc_strm_tab`.`dbt_retail_streaming_poc`.`slr_orders` ADD CONSTRAINT chk_52731694 CHECK (amount >= 0 AND amount <= 100000);
